@@ -1,0 +1,343 @@
+/* Каменные скрижали: оформление */
+.stone-puzzles {
+  --st-dark: #1f1c19;
+  --st-mid: #4a453e;
+  --st-base: #6b655b;
+  --st-light: #9a9283;
+  --st-gold: #d9b867;
+  --st-glow: #ffe49a;
+  --st-ok: #7fcf8a;
+  --st-bad: #d96b5a;
+  --st-ink: #1a1613;
+  --st-font: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+  --st-noise: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background: var(--st-dark);
+  border: 3px solid #14110f;
+  border-radius: 6px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .7), inset 0 0 0 2px #5b554b;
+  font-family: var(--st-font);
+}
+.stone-puzzles .window-header {
+  background: var(--st-noise), linear-gradient(#3a352f, #25211d);
+  border-bottom: 2px solid #100d0b;
+  color: #e9dfc8;
+  text-shadow: 0 -1px 0 #000, 0 1px 0 rgba(255, 255, 255, .15);
+  font-family: var(--st-font);
+  letter-spacing: .04em;
+}
+.stone-puzzles .window-header .window-title { font-family: var(--st-font); }
+.stone-puzzles .window-header :is(button, a, i) { color: #d8cdb2; }
+.stone-puzzles .window-content {
+  padding: 0;
+  background: transparent;
+  overflow: auto;
+}
+
+/* Плита */
+.stone-puzzles .sp-tablet {
+  position: relative;
+  min-height: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px 16px;
+  color: #efe6d0;
+  background:
+    var(--st-noise),
+    radial-gradient(ellipse at 30% 10%, rgba(255, 255, 255, .12), transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(0, 0, 0, .35), transparent 60%),
+    linear-gradient(160deg, #7a7367, #565046 55%, #463f37);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, .55), inset 0 2px 0 rgba(255, 255, 255, .15);
+  outline: none;
+}
+.stone-puzzles .sp-tablet::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 2px solid rgba(0, 0, 0, .45);
+  border-radius: 4px;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .18), inset 0 1px 0 rgba(255, 255, 255, .12);
+  pointer-events: none;
+}
+.stone-puzzles .sp-tablet > * { position: relative; }
+.stone-puzzles .sp-tablet.fx-bad { animation: sp-shake .45s; }
+.stone-puzzles .sp-tablet.fx-ok { animation: sp-glow .8s; }
+@keyframes sp-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-7px); } 40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); } 80% { transform: translateX(3px); }
+}
+@keyframes sp-glow {
+  0% { box-shadow: inset 0 0 40px rgba(0, 0, 0, .55); }
+  40% { box-shadow: inset 0 0 70px rgba(255, 228, 154, .65); }
+  100% { box-shadow: inset 0 0 40px rgba(0, 0, 0, .55); }
+}
+
+/* Высеченный текст */
+.stone-puzzles h2, .stone-puzzles legend, .stone-puzzles .sp-flabel, .stone-puzzles b {
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .22), 0 -1px 0 rgba(0, 0, 0, .75);
+}
+.stone-puzzles .sp-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 4px 8px; }
+.stone-puzzles .sp-head > i { font-size: 1.5em; color: var(--st-gold); }
+.stone-puzzles .sp-head h2 {
+  flex: 1; margin: 0; border: 0; font-family: var(--st-font);
+  font-size: 1.55em; letter-spacing: .06em; text-transform: uppercase; color: #f1e7cf;
+}
+.stone-puzzles .sp-badge {
+  padding: 2px 9px; border-radius: 3px; font-size: .8em;
+  background: rgba(20, 17, 14, .6); border: 1px solid var(--st-gold); color: var(--st-gold);
+}
+.stone-puzzles .sp-badge.sp-hidden { border-color: #888; color: #bbb; }
+.stone-puzzles .sp-intro {
+  margin: 4px 4px 12px; padding: 10px 14px; font-style: italic; white-space: pre-wrap;
+  background: rgba(0, 0, 0, .28); border-radius: 3px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, .6), 0 1px 0 rgba(255, 255, 255, .12);
+  color: #f3ead3;
+}
+.stone-puzzles .sp-body { display: flex; justify-content: center; margin: 6px 0 10px; }
+.stone-puzzles .sp-body > * { width: 100%; }
+.stone-puzzles .sp-note { margin: 6px 0; font-size: .85em; color: #d7ccb2; opacity: .9; text-align: center; }
+
+/* Кнопки-камни */
+.stone-puzzles .sp-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  width: auto; height: auto; min-height: 30px; padding: 4px 12px; margin: 0;
+  font-family: var(--st-font); font-size: 1em; line-height: 1.2; color: #f1e7cf;
+  background: var(--st-noise), linear-gradient(#7e776a, #544e44);
+  border: 1px solid #1a1613; border-radius: 4px; cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), inset 0 -2px 0 rgba(0, 0, 0, .35), 0 2px 3px rgba(0, 0, 0, .5);
+  text-shadow: 0 -1px 0 #000;
+  transition: filter .12s, transform .08s;
+}
+.stone-puzzles .sp-btn:hover:not(:disabled) { filter: brightness(1.18); }
+.stone-puzzles .sp-btn:active:not(:disabled) { transform: translateY(1px); box-shadow: inset 0 2px 4px rgba(0, 0, 0, .6); }
+.stone-puzzles .sp-btn:disabled { opacity: .45; cursor: default; }
+.stone-puzzles .sp-btn.sp-mini { min-height: 26px; padding: 2px 8px; }
+.stone-puzzles .sp-btn.sp-big { font-size: 1.1em; padding: 7px 22px; margin: 8px auto 2px; display: flex; letter-spacing: .05em; }
+.stone-puzzles .sp-btn.is-on { color: var(--st-gold); border-color: var(--st-gold); }
+
+/* Подвал: подсказки, бросок, победа */
+.stone-puzzles .sp-foot { margin: 8px 4px 0; display: flex; flex-direction: column; gap: 8px; }
+.stone-puzzles .sp-hintline {
+  padding: 6px 10px; border-left: 3px solid var(--st-gold); background: rgba(0, 0, 0, .25);
+  border-radius: 0 3px 3px 0; white-space: pre-wrap;
+}
+.stone-puzzles .sp-hintline i { color: var(--st-gold); }
+.stone-puzzles .sp-rollbox { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.stone-puzzles .sp-rollbox small { color: #d1c6ab; }
+.stone-puzzles .sp-roll { color: var(--st-glow); }
+.stone-puzzles .sp-win {
+  text-align: center; padding: 10px; border: 2px solid var(--st-gold); border-radius: 4px;
+  background: rgba(40, 32, 10, .45); color: var(--st-glow);
+  box-shadow: 0 0 18px rgba(217, 184, 103, .4), inset 0 0 14px rgba(217, 184, 103, .25);
+}
+.stone-puzzles .sp-win-text { margin-top: 6px; white-space: pre-wrap; color: #f6ecd0; font-style: italic; }
+.stone-puzzles .is-solved .sp-body { filter: drop-shadow(0 0 8px rgba(217, 184, 103, .55)); }
+
+/* Кольца */
+.stone-puzzles .sp-rings { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+.stone-puzzles .sp-ring-canvas {
+  width: 100%; max-width: 380px; aspect-ratio: 1; border-radius: 50%; cursor: pointer; flex: 0 0 auto;
+  box-shadow: 0 0 0 6px #2a251f, 0 0 0 8px #716a5e, 0 8px 20px rgba(0, 0, 0, .7);
+}
+.stone-puzzles .sp-rings .sp-side { flex: 1 1 150px; min-width: 150px; }
+.stone-puzzles .sp-rings .sp-side .sp-note { text-align: left; }
+.stone-puzzles .sp-ring-row { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
+.stone-puzzles .sp-ring-name { flex: 1; }
+.stone-puzzles .sp-ring-row.is-locked .sp-ring-name { color: var(--st-gold); }
+
+/* Шифр */
+.stone-puzzles .sp-text, .stone-puzzles .sp-decoded {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 14px; justify-content: center;
+  padding: 12px; background: rgba(0, 0, 0, .25); border-radius: 4px; box-shadow: inset 0 3px 8px rgba(0, 0, 0, .6);
+}
+.stone-puzzles .sp-word { display: inline-flex; gap: 2px; }
+.stone-puzzles .sp-space { width: 8px; }
+.stone-puzzles .sp-break { flex-basis: 100%; height: 0; }
+.stone-puzzles .sp-punct { align-self: flex-end; font-size: 1.4em; padding: 0 2px; }
+.stone-puzzles .sp-cell {
+  display: flex; flex-direction: column; align-items: center; width: 30px; height: auto; padding: 2px 0; margin: 0;
+  background: rgba(0, 0, 0, .3); border: 1px solid rgba(0, 0, 0, .6); border-radius: 3px; cursor: pointer; color: #f1e7cf;
+  font-family: var(--st-font); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12);
+}
+.stone-puzzles .sp-cell:hover { background: rgba(255, 228, 154, .15); }
+.stone-puzzles .sp-cell.is-sel { border-color: var(--st-glow); box-shadow: 0 0 8px var(--st-glow); background: rgba(255, 228, 154, .22); }
+.stone-puzzles .sp-cell.is-fixed .sp-c-bot { color: var(--st-gold); }
+.stone-puzzles .sp-c-top { font-size: 1.05em; opacity: .8; }
+.stone-puzzles .sp-c-bot { font-size: 1.35em; font-weight: 700; min-height: 1.4em; color: var(--st-glow); border-top: 1px solid rgba(255, 255, 255, .25); width: 100%; text-align: center; }
+.stone-puzzles .sp-freq, .stone-puzzles .sp-reveal { margin: 8px 0; font-size: .9em; text-align: center; color: #e0d5bb; }
+.stone-puzzles .sp-reveal { padding: 6px 10px; border: 1px dashed var(--st-gold); color: var(--st-glow); letter-spacing: .08em; }
+.stone-puzzles .sp-kb { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin-top: 8px; }
+.stone-puzzles .sp-key {
+  width: 30px; height: 30px; padding: 0; margin: 0; font-family: var(--st-font); font-weight: 700; color: #f1e7cf;
+  background: var(--st-noise), linear-gradient(#7e776a, #544e44); border: 1px solid #1a1613; border-radius: 4px; cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 2px 2px rgba(0, 0, 0, .5);
+}
+.stone-puzzles .sp-key:hover { filter: brightness(1.2); }
+.stone-puzzles .sp-key-del { width: 44px; }
+.stone-puzzles .sp-dch { font-size: 1.7em; font-weight: 700; color: var(--st-glow); text-shadow: 0 1px 0 #000; min-width: 22px; text-align: center; }
+.stone-puzzles .sp-shift { display: flex; justify-content: center; align-items: center; gap: 18px; margin: 12px 0 8px; }
+.stone-puzzles .sp-shift-val { display: flex; flex-direction: column; align-items: center; min-width: 60px; }
+.stone-puzzles .sp-shift-val b { font-size: 1.9em; color: var(--st-gold); }
+.stone-puzzles .sp-disc { margin: 8px auto; padding: 8px; background: rgba(0, 0, 0, .25); border-radius: 4px; overflow-x: auto; }
+.stone-puzzles .sp-disc-label { text-align: center; font-size: .75em; opacity: .75; }
+.stone-puzzles .sp-disc-row { display: flex; justify-content: center; }
+.stone-puzzles .sp-disc-row span { width: 18px; text-align: center; font-size: .95em; }
+.stone-puzzles .sp-disc-row.outer span { border-bottom: 1px solid rgba(255, 255, 255, .25); }
+.stone-puzzles .sp-disc-row.inner span { color: var(--st-glow); font-weight: 700; }
+
+/* Криптекс */
+.stone-puzzles .sp-cryptex { text-align: center; }
+.stone-puzzles .sp-wheels {
+  display: inline-flex; gap: 6px; padding: 14px 18px; border-radius: 12px; max-width: 100%; overflow-x: auto;
+  background: linear-gradient(#2a2622, #4c463d 50%, #2a2622); box-shadow: inset 0 0 12px #000, 0 4px 10px rgba(0, 0, 0, .6);
+  border: 2px solid #15110e;
+}
+.stone-puzzles .sp-wheel { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; width: 48px; }
+.stone-puzzles .sp-w-side { font-size: 1.05em; opacity: .35; line-height: 1.1; }
+.stone-puzzles .sp-w-cur {
+  width: 100%; padding: 8px 0; font-size: 1.9em; font-weight: 700; line-height: 1; color: var(--st-glow);
+  background: linear-gradient(90deg, #3b362f, #6e675b 50%, #3b362f); border: 1px solid #0d0b09; border-radius: 3px;
+  text-shadow: 0 -1px 0 #000, 0 1px 0 rgba(255, 255, 255, .2); box-shadow: inset 0 0 8px rgba(0, 0, 0, .7);
+}
+.stone-puzzles .sp-wheel.is-locked .sp-w-cur { color: var(--st-ok); }
+.stone-puzzles .sp-w-lock { position: absolute; bottom: -2px; font-size: .75em; color: var(--st-ok); }
+.stone-puzzles .is-solved .sp-w-cur { color: var(--st-ok); box-shadow: 0 0 10px rgba(127, 207, 138, .6); }
+
+/* Пропущенное слово */
+.stone-puzzles .sp-sentence {
+  font-size: 1.35em; line-height: 2.2; text-align: center; padding: 14px 16px;
+  background: rgba(0, 0, 0, .25); border-radius: 4px; box-shadow: inset 0 3px 8px rgba(0, 0, 0, .6);
+}
+.stone-puzzles .sp-slot, .stone-puzzles .sp-input {
+  display: inline-block; vertical-align: baseline; min-width: 110px; height: auto; margin: 0 4px; padding: 0 10px;
+  font-family: var(--st-font); font-size: 1em; text-align: center; color: var(--st-glow);
+  background: rgba(0, 0, 0, .45); border: 0; border-bottom: 2px dashed var(--st-gold); border-radius: 3px; cursor: pointer;
+}
+.stone-puzzles .sp-input { cursor: text; width: 150px; }
+.stone-puzzles .sp-slot.is-sel { box-shadow: 0 0 8px var(--st-glow); border-bottom-style: solid; }
+.stone-puzzles .sp-slot.is-ok, .stone-puzzles .sp-input.is-ok { color: var(--st-ok); border-bottom: 2px solid var(--st-ok); cursor: default; }
+.stone-puzzles .sp-bank { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 12px 0 4px; }
+.stone-puzzles .sp-chip {
+  width: auto; height: auto; padding: 5px 14px; margin: 0; font-family: var(--st-font); font-size: 1.05em; color: #f1e7cf;
+  background: var(--st-noise), linear-gradient(#80796c, #565046); border: 1px solid #1a1613; border-radius: 12px; cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 2px 3px rgba(0, 0, 0, .5);
+}
+.stone-puzzles .sp-chip:hover:not(:disabled) { filter: brightness(1.2); }
+
+/* Арканый замок */
+.stone-puzzles .sp-lockwrap { text-align: center; }
+.stone-puzzles .sp-lock { position: relative; width: 340px; height: 340px; max-width: 100%; margin: 4px auto; border-radius: 50%;
+  background: radial-gradient(circle, #1a1713 0, #302b25 55%, #1a1713 100%); box-shadow: inset 0 0 22px #000, 0 0 0 5px #2a251f, 0 0 0 7px #756e61, 0 6px 16px rgba(0, 0, 0, .7); }
+.stone-puzzles .sp-lock::before { content: ""; position: absolute; inset: 20px; border-radius: 50%; border: 2px dashed rgba(217, 184, 103, .3); }
+.stone-puzzles .sp-rune {
+  position: absolute; left: calc(50% + var(--x)); top: calc(50% + var(--y)); transform: translate(-50%, -50%);
+  width: 46px; height: 46px; padding: 0; margin: 0; border-radius: 50%; cursor: pointer; color: #d7ccb2;
+  background: var(--st-noise), linear-gradient(#6e675b, #3f3a32); border: 2px solid #15110e;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 2px 4px rgba(0, 0, 0, .7); transition: box-shadow .2s, color .2s;
+}
+.stone-puzzles .sp-rune:hover:not(:disabled) { filter: brightness(1.25); }
+.stone-puzzles .sp-rune:disabled { cursor: default; }
+.stone-puzzles .sp-glyph { font-size: 1.7em; line-height: 1; }
+.stone-puzzles .sp-rune.is-lit { color: var(--st-glow); border-color: var(--st-gold); box-shadow: 0 0 14px var(--st-glow), inset 0 0 8px rgba(255, 228, 154, .5); }
+.stone-puzzles .sp-order { position: absolute; right: -4px; bottom: -4px; font-size: .62em; font-weight: 700; padding: 0 4px; border-radius: 6px; background: #14110f; color: var(--st-gold); }
+.stone-puzzles .sp-lock-core { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; pointer-events: none; }
+.stone-puzzles .sp-dots { display: flex; gap: 6px; max-width: 120px; flex-wrap: wrap; justify-content: center; }
+.stone-puzzles .sp-dot { width: 12px; height: 12px; border-radius: 50%; background: #17130f; border: 1px solid #6b655b; box-shadow: inset 0 1px 3px #000; }
+.stone-puzzles .sp-dot.on { background: var(--st-glow); box-shadow: 0 0 8px var(--st-glow); }
+.stone-puzzles .sp-dot.given { background: var(--st-gold); }
+.stone-puzzles .sp-lock-core small { opacity: .75; }
+.stone-puzzles .sp-jam { color: var(--st-bad); letter-spacing: .1em; }
+.stone-puzzles .sp-lock.is-jammed { box-shadow: inset 0 0 30px rgba(217, 107, 90, .6), 0 0 0 5px #3a1c17, 0 0 0 7px #8a4a40; }
+.stone-puzzles .is-solved .sp-rune { color: var(--st-ok); border-color: var(--st-ok); box-shadow: 0 0 12px rgba(127, 207, 138, .6); }
+
+/* Менеджер */
+.stone-puzzles .sp-toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+.stone-puzzles .sp-empty { text-align: center; padding: 30px 10px; font-style: italic; }
+.stone-puzzles .sp-row {
+  display: flex; align-items: center; gap: 10px; margin: 6px 0; padding: 8px 10px; border-radius: 4px;
+  background: rgba(0, 0, 0, .25); box-shadow: inset 0 2px 5px rgba(0, 0, 0, .55), 0 1px 0 rgba(255, 255, 255, .12);
+}
+.stone-puzzles .sp-row.is-off { opacity: .6; }
+.stone-puzzles .sp-row.is-solved .sp-row-ico { color: var(--st-ok); }
+.stone-puzzles .sp-row-ico { font-size: 1.5em; width: 32px; text-align: center; color: var(--st-gold); }
+.stone-puzzles .sp-row-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.stone-puzzles .sp-row-main small { color: #d1c6ab; }
+.stone-puzzles .sp-row-acts { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+
+/* Редактор */
+.stone-puzzles .sp-form fieldset { margin: 0 0 12px; padding: 8px 12px 10px; border: 1px solid rgba(0, 0, 0, .55); border-radius: 4px; box-shadow: 0 1px 0 rgba(255, 255, 255, .15); }
+.stone-puzzles .sp-form legend { padding: 0 8px; color: var(--st-gold); letter-spacing: .06em; }
+.stone-puzzles .sp-field { display: flex; flex-direction: column; gap: 3px; margin: 8px 0; }
+.stone-puzzles .sp-flabel { font-size: .9em; }
+.stone-puzzles .sp-hint-text { color: #d1c6ab; opacity: .85; }
+.stone-puzzles .sp-form :is(input[type=text], input[type=number], textarea, select) {
+  width: 100%; box-sizing: border-box; color: #f6ecd0; font-family: var(--st-font);
+  background: rgba(0, 0, 0, .4); border: 1px solid #14110f; border-radius: 3px; box-shadow: inset 0 2px 5px rgba(0, 0, 0, .6);
+}
+.stone-puzzles .sp-form select option { background: #2a2622; color: #f6ecd0; }
+.stone-puzzles .sp-form textarea { resize: vertical; }
+.stone-puzzles .sp-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stone-puzzles .sp-inline { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+.stone-puzzles .sp-row-inline { display: flex; gap: 8px; align-items: center; }
+.stone-puzzles .sp-prev { display: block; max-width: 160px; max-height: 160px; margin: 6px auto; border: 3px solid #2a251f; border-radius: 4px; }
+.stone-puzzles .sp-seq-runes { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.stone-puzzles .sp-rune-pick { flex-direction: column; width: 46px; padding: 2px; gap: 0; }
+.stone-puzzles .sp-rune-pick span { font-size: 1.4em; line-height: 1.1; }
+.stone-puzzles .sp-rune-pick small { font-size: .65em; opacity: .75; }
+.stone-puzzles .sp-seq-chain { margin: 6px 0; padding: 6px 10px; background: rgba(0, 0, 0, .3); border-radius: 3px; font-size: 1.05em; min-height: 1.6em; }
+
+/* Окна диалогов и чат */
+.sp-assign label { display: block; margin: 4px 0; }
+.sp-chat { padding: 6px 8px; border: 1px solid #8a7a55; border-radius: 3px; background: rgba(120, 105, 70, .12); }
+
+/* Счётчик попыток */
+.stone-puzzles .sp-tries { margin: 8px 0; text-align: center; font-size: .95em; color: var(--st-gold); letter-spacing: .04em; }
+.stone-puzzles .sp-tries.is-out { color: var(--st-bad); }
+
+/* Взлом замка */
+.stone-puzzles .sp-pick { text-align: center; }
+.stone-puzzles .sp-pins {
+  display: inline-flex; gap: 14px; padding: 34px 22px 12px; margin: 4px 0 6px; border-radius: 6px;
+  background: linear-gradient(#2a2622, #4c463d 45%, #2a2622); border: 2px solid #15110e; box-shadow: inset 0 0 14px #000, 0 4px 10px rgba(0, 0, 0, .6);
+}
+.stone-puzzles .sp-pin { position: relative; width: 34px; height: 84px; transition: transform .25s; }
+.stone-puzzles .sp-pin-body {
+  position: absolute; inset: 0; border-radius: 4px 4px 12px 12px; border: 1px solid #0d0b09;
+  background: linear-gradient(90deg, #4a443b, #8c8476 50%, #4a443b); box-shadow: inset 0 0 8px rgba(0, 0, 0, .7);
+}
+.stone-puzzles .sp-pin-top { position: absolute; left: 4px; right: 4px; top: -14px; height: 14px; border-radius: 3px 3px 0 0; background: #2b2722; border: 1px solid #0d0b09; }
+.stone-puzzles .sp-pin-n { position: absolute; left: 0; right: 0; bottom: 4px; text-align: center; font-weight: 700; color: #1a1613; text-shadow: 0 1px 0 rgba(255, 255, 255, .25); }
+.stone-puzzles .sp-pin.is-set { transform: translateY(-16px); }
+.stone-puzzles .sp-pin.is-set .sp-pin-body { background: linear-gradient(90deg, #8a6f2c, var(--st-glow) 50%, #8a6f2c); box-shadow: 0 0 12px rgba(255, 228, 154, .7); }
+.stone-puzzles .sp-pin.is-cur .sp-pin-body { outline: 2px solid var(--st-glow); box-shadow: 0 0 12px rgba(255, 228, 154, .55), inset 0 0 8px rgba(0, 0, 0, .7); }
+.stone-puzzles .sp-notches { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin: 8px 0; }
+.stone-puzzles .sp-notch {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; width: 62px; height: auto; min-height: 48px; padding: 4px 2px; margin: 0;
+  font-family: var(--st-font); color: #f1e7cf; cursor: pointer; border: 1px solid #1a1613; border-radius: 4px;
+  background: var(--st-noise), linear-gradient(#7e776a, #544e44); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 2px 3px rgba(0, 0, 0, .5);
+}
+.stone-puzzles .sp-notch:hover:not(:disabled) { filter: brightness(1.2); }
+.stone-puzzles .sp-notch b { font-size: 1.3em; }
+.stone-puzzles .sp-notch small { font-size: .7em; color: var(--st-glow); line-height: 1.1; }
+.stone-puzzles .sp-notch.is-tried { opacity: .75; background: linear-gradient(#3b362f, #2a2622); cursor: default; }
+.stone-puzzles .sp-durab { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; justify-content: center; margin: 8px 0; }
+.stone-puzzles .sp-durab > span { margin-right: 6px; font-size: .9em; }
+.stone-puzzles .sp-pick-roll { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 8px; }
+.stone-puzzles .sp-pick-roll small { color: #d1c6ab; max-width: 420px; }
+.stone-puzzles .is-solved .sp-pin-body { background: linear-gradient(90deg, #3f7a4a, var(--st-ok) 50%, #3f7a4a); }
+
+/* Экранный оверлей (общий экран): компактная плита, как обычное окно; карта остаётся видна */
+.sp-screen {
+  position: fixed; inset: 0; z-index: 2147483000; display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.sp-screen .sp-screen-frame {
+  position: relative; width: 620px; max-width: 94vw; pointer-events: none;
+  transform: translate(calc(var(--n, 0) * 26px), calc(var(--n, 0) * 26px));
+}
+.sp-screen .sp-screen-inner { width: 100%; max-height: 94vh; overflow: auto; pointer-events: auto; }
+.sp-screen .sp-head { padding-right: 38px; }
+.sp-screen-x {
+  position: absolute; top: 12px; right: 14px; z-index: 2; width: 28px; height: 28px; padding: 0; border-radius: 50%; cursor: pointer;
+  color: #d8cdb2; background: rgba(30, 26, 22, .85); border: 1px solid #5b554b; opacity: .5; pointer-events: auto;
+}
+.sp-screen-x:hover { opacity: 1; }
