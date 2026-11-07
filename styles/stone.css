@@ -341,3 +341,55 @@
   color: #d8cdb2; background: rgba(30, 26, 22, .85); border: 1px solid #5b554b; opacity: .5; pointer-events: auto;
 }
 .sp-screen-x:hover { opacity: 1; }
+
+/* Таймер */
+.stone-puzzles .sp-timer { display: inline-flex; align-items: center; gap: 5px; font-variant-numeric: tabular-nums; }
+.stone-puzzles .sp-timer.is-low { color: var(--st-bad); border-color: var(--st-bad); animation: sp-pulse 1s infinite; }
+.stone-puzzles .sp-timer.is-out { color: var(--st-bad); border-color: var(--st-bad); }
+@keyframes sp-pulse { 50% { box-shadow: 0 0 10px rgba(217, 107, 90, .7); } }
+
+/* Пары из картинок */
+.stone-puzzles .sp-pairs { text-align: center; }
+.stone-puzzles .sp-pcols { display: flex; justify-content: center; align-items: flex-start; gap: 14px; flex-wrap: wrap; }
+.stone-puzzles .sp-pcol { display: flex; flex-direction: column; gap: 8px; flex: 1 1 200px; max-width: 260px; }
+.stone-puzzles .sp-parrow { align-self: center; font-size: 1.4em; color: var(--st-gold); }
+.stone-puzzles .sp-pitem {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; height: auto; min-height: 56px; padding: 6px; margin: 0;
+  font-family: var(--st-font); color: #f1e7cf; cursor: pointer; border: 2px solid #1a1613; border-radius: 6px;
+  background: var(--st-noise), linear-gradient(#7e776a, #544e44); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 2px 4px rgba(0, 0, 0, .55);
+}
+.stone-puzzles .sp-pitem:hover:not(:disabled) { filter: brightness(1.15); }
+.stone-puzzles .sp-pitem.is-sel { border-color: var(--st-glow); box-shadow: 0 0 12px var(--st-glow); }
+.stone-puzzles .sp-pitem.is-ok { border-color: var(--st-ok); opacity: .9; cursor: default; }
+.stone-puzzles .sp-pitem img { width: 100%; max-height: 110px; object-fit: cover; border-radius: 4px; border: 1px solid rgba(0, 0, 0, .6); pointer-events: none; }
+.stone-puzzles .sp-pcap { font-size: 1.05em; text-shadow: 0 1px 0 rgba(0, 0, 0, .6); }
+.stone-puzzles .sp-pbadge { position: absolute; top: -8px; right: -8px; min-width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .85em; color: #1a1613; border: 2px solid #1a1613; box-shadow: 0 1px 3px #000; }
+.stone-puzzles .sp-pbadge.sp-pdone { background: var(--st-ok); }
+
+/* Рычаги */
+.stone-puzzles .sp-leverwrap { text-align: center; }
+.stone-puzzles .sp-lamps { display: flex; gap: 14px; justify-content: center; margin-bottom: 14px; }
+.stone-puzzles .sp-lamp { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: #6b655b; background: radial-gradient(circle at 35% 30%, #4a443b, #1d1a16); border: 3px solid #14110f; box-shadow: inset 0 0 8px #000, 0 2px 4px rgba(0, 0, 0, .6); }
+.stone-puzzles .sp-lamp.is-on { color: #4a3a10; background: radial-gradient(circle at 35% 30%, #fff3c4, #e8b94a 60%, #a8741a); box-shadow: 0 0 20px rgba(255, 214, 110, .85), inset 0 0 8px rgba(255, 255, 255, .5); }
+.stone-puzzles .sp-levers { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+.stone-puzzles .sp-lever-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.stone-puzzles .sp-lever { width: 46px; height: auto; padding: 0; margin: 0; background: none; border: 0; cursor: pointer; }
+.stone-puzzles .sp-lever-slot { display: block; position: relative; width: 26px; height: 92px; margin: 0 auto; border-radius: 13px; background: linear-gradient(90deg, #14110f, #3a352f 50%, #14110f); box-shadow: inset 0 0 8px #000, 0 1px 0 rgba(255, 255, 255, .2); }
+.stone-puzzles .sp-lever-knob { position: absolute; left: -6px; top: 2px; width: 38px; height: 38px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #e8dcc0, #8c8476 60%, #4a443b); border: 2px solid #14110f; box-shadow: 0 3px 5px rgba(0, 0, 0, .7); transition: top .25s; }
+.stone-puzzles .sp-lever.is-down .sp-lever-knob { top: 50px; }
+.stone-puzzles .sp-lever:hover:not(:disabled) .sp-lever-knob { filter: brightness(1.15); }
+.stone-puzzles .sp-lever:disabled { cursor: default; opacity: .7; }
+.stone-puzzles .sp-lever-info { color: #d1c6ab; min-height: 1.2em; }
+.stone-puzzles .sp-dot.sp-alarm.on { background: var(--st-bad); box-shadow: 0 0 8px var(--st-bad); }
+
+/* Тень и свет */
+.stone-puzzles .sp-mirrors { text-align: center; }
+.stone-puzzles .sp-mirror-canvas { width: 100%; max-width: 560px; height: auto; border-radius: 6px; cursor: pointer; box-shadow: 0 0 0 4px #2a251f, 0 0 0 6px #716a5e, 0 8px 18px rgba(0, 0, 0, .7); }
+
+/* Редактор: пары, цепочка */
+.stone-puzzles .sp-pair-row { display: flex; align-items: flex-start; gap: 8px; margin: 8px 0; padding: 8px; background: rgba(0, 0, 0, .22); border-radius: 4px; }
+.stone-puzzles .sp-pair-row > i { align-self: center; color: var(--st-gold); }
+.stone-puzzles .sp-pair-n { font-weight: 700; color: var(--st-gold); padding-top: 18px; }
+.stone-puzzles .sp-pside { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.stone-puzzles .sp-prev.sp-prev-s { max-width: 70px; max-height: 70px; margin: 2px 0; }
+.stone-puzzles .sp-chain { display: flex; flex-direction: column; gap: 2px; margin: 4px 0; }
