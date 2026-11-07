@@ -1,5 +1,5 @@
 import { h, field, pickImage, MOD } from "./util.mjs";
-import { Store, newPuzzle, resetPuzzle } from "./store.mjs";
+import { Store, newPuzzle, resetPuzzle, setVisible, nowMs } from "./store.mjs";
 import { Logic, TYPES, runeGlyph, ABILITIES, SKILLS } from "./logic.mjs";
 import { PuzzleView, openPuzzle } from "./views.mjs";
 
@@ -29,7 +29,7 @@ export class PuzzleManager extends ApplicationV2 {
     if (gm) {
       root.append(h("div", { class: "sp-toolbar" },
         h("button", { class: "sp-btn", onclick: () => this.#create() }, icon("fa-plus"), " Новая головоломка"),
-        h("button", { class: "sp-btn", onclick: () => Store.mutate(l => l.forEach(p => (p.visible = false))) }, icon("fa-eye-slash"), " Скрыть все"),
+        h("button", { class: "sp-btn", onclick: () => Store.mutate(l => l.forEach(p => setVisible(p, false))) }, icon("fa-eye-slash"), " Скрыть все"),
         h("button", { class: "sp-btn", title: "Кто из пользователей показывает скрижали на общем экране", onclick: () => this.#screens() }, icon("fa-tv"), " Общий экран")));
       root.append(h("p", { class: "sp-note" }, "Для ответов скрижалей мастер должен быть в сети."));
     }
@@ -41,7 +41,9 @@ export class PuzzleManager extends ApplicationV2 {
         h("div", { class: "sp-row-ico" }, icon(info.icon)),
         h("div", { class: "sp-row-main" },
           h("b", {}, p.name),
-          h("small", {}, info.label, p.solved ? " · решено" : "", gm ? ` · ${this.#assignText(p)}` : "")));
+          h("small", {}, info.label, p.solved ? " · решено" : "", gm ? ` · ${this.#assignText(p)}` : "",
+            gm && p.timer?.sec ? ` · таймер ${Math.round(p.timer.sec / 6) / 10} мин` : "",
+            gm && p.unlocks?.length ? ` · откроет: ${p.unlocks.map(id => list.find(q => q.id === id)?.name).filter(Boolean).join(", ")}` : "")));
       const acts = h("div", { class: "sp-row-acts" });
       const add = (ico, title, fn, extra = "") => acts.append(h("button", { class: "sp-btn sp-mini " + extra, title, onclick: fn }, icon(ico)));
       add("fa-book-open", "Открыть", () => PuzzleView.open(p.id));
@@ -49,7 +51,7 @@ export class PuzzleManager extends ApplicationV2 {
         add(p.visible ? "fa-eye" : "fa-eye-slash", p.visible ? "Скрыть от игроков" : "Показать игрокам",
           async () => {
             const show = !p.visible;
-            await Store.mutate(l => { const x = l.find(q => q.id === p.id); if (x) x.visible = show; });
+            await Store.mutate(l => { const x = l.find(q => q.id === p.id); if (x) setVisible(x, show); });
             if (show) openPuzzle(p.id); // мастер тоже видит показанную головоломку
           }, p.visible ? "is-on" : "");
         add("fa-users", "Кому назначена", () => this.#assign(p.id));
@@ -156,6 +158,8 @@ export class PuzzleEditor extends ApplicationV2 {
     this.isNew = !existing;
     this.draft = existing ?? newPuzzle(options.type);
     this.origConfig = JSON.stringify(this.draft.config);
+    this.draft.timer ??= { sec: 0, action: "lock", left: 0, since: null, expired: false };
+    this.draft.unlocks ??= [];
     this.hintsText = (this.draft.hints ?? []).join("\n");
   }
 
@@ -230,6 +234,38 @@ export class PuzzleEditor extends ApplicationV2 {
         field("Проверка персонажа", sel(c, "stat", [["best", "Лучшее: Ловкость рук или воровские инструменты"], ["skills.slt", "Ловкость рук"], ["tools.thief", "Воровские инструменты"], ["abilities.dex", "Ловкость (чистая)"]]), "Если у персонажа нет владения инструментами, берётся модификатор Ловкости."),
         h("div", { class: "sp-two" }, field("Сложность первого штифта (DC)", num(c, "dc", 0, 40)), field("Рост DC за каждый следующий штифт", num(c, "dcStep", 0, 10))),
         field("Преимущество / помеха", sel(c, "adv", [["normal", "Обычный бросок"], ["adv", "Преимущество (хорошие инструменты)"], ["dis", "Помеха (нет инструментов)"]]))),
+      pairs: () => {
+        const box = h("div", { class: "sp-pairs-ed" });
+        const side = (o, label) => {
+          const prev = h("img", { class: "sp-prev sp-prev-s", src: o.img || "", style: { display: o.img ? "" : "none" } });
+          const inp = h("input", { type: "text", value: o.img ?? "", placeholder: "путь к картинке", oninput: e => { o.img = e.target.value; prev.src = o.img; prev.style.display = o.img ? "" : "none"; } });
+          return h("div", { class: "sp-pside" }, h("span", { class: "sp-flabel" }, label),
+            h("div", { class: "sp-row-inline" }, inp,
+              h("button", { type: "button", class: "sp-btn sp-mini", title: "Выбрать картинку", onclick: () => pickImage(o.img, path => { o.img = path; inp.value = path; prev.src = path; prev.style.display = ""; }) }, icon("fa-folder-open"))),
+            prev,
+            h("input", { type: "text", value: o.text ?? "", placeholder: "подпись (необязательно)", oninput: e => (o.text = e.target.value) }));
+        };
+        const draw = () => box.replaceChildren(
+          ...c.pairs.map((pr, i) => {
+            pr.a ??= { img: "", text: "" }; pr.b ??= { img: "", text: "" };
+            return h("div", { class: "sp-pair-row" }, h("div", { class: "sp-pair-n" }, i + 1), side(pr.a, "Левая карточка"), icon("fa-arrows-left-right"), side(pr.b, "Правая карточка"),
+              h("button", { type: "button", class: "sp-btn sp-mini", title: "Удалить пару", disabled: c.pairs.length <= 2, onclick: () => { c.pairs.splice(i, 1); draw(); } }, icon("fa-trash")));
+          }),
+          h("button", { type: "button", class: "sp-btn", disabled: c.pairs.length >= 8, onclick: () => { c.pairs.push({ a: { img: "", text: "" }, b: { img: "", text: "" } }); draw(); } }, icon("fa-plus"), " Добавить пару"));
+        f.append(h("p", { class: "sp-hint-text" }, "Составьте пары из своих картинок и/или подписей (2–8 пар). Игроки увидят карточки перемешанными и должны соединить подходящие."),
+          box, field("Лимит попыток (0 — без лимита)", num(c, "maxAttempts", 0, 99), "Попытка — нажатие «Проверить» с хотя бы одной неверной связью."));
+        draw();
+      },
+      levers: () => f.append(
+        h("p", { class: "sp-hint-text" }, "Рычаги переключают огни, схема случайна, но всегда решаема. Каждое движение будит ловушку. Рекомендуется бросок Расследования: при успехе открывается, какие огни переключает один из рычагов."),
+        h("div", { class: "sp-two" }, field("Рычагов (3–6)", num(c, "levers", 3, 6)), field("Огней (3–6)", num(c, "lamps", 3, 6))),
+        field("Тревога до срабатывания ловушки (4–60 движений)", num(c, "maxAlarm", 4, 60)),
+        field("Когда ловушка сработала", sel(c, "onTrap", [["reset", "Рычаги возвращаются в начало"], ["lock", "Механизм запирается (нужна помощь)"]])),
+        field("Текст срабатывания ловушки", txt(c, "trapText", "Из стен вырываются струи пламени!"))),
+      mirrors: () => f.append(
+        h("p", { class: "sp-hint-text" }, "Луч идёт слева, игроки поворачивают зеркала, чтобы он дошёл до руны. Схема генерируется случайно и всегда решаема."),
+        h("div", { class: "sp-two" }, field("Размер поля (5–9)", num(c, "size", 5, 9)), field("Поворотов луча (1–7)", num(c, "turns", 1, 7))),
+        h("div", { class: "sp-two" }, field("Лишних зеркал (0–12)", num(c, "decoys", 0, 12)), field("Каменных блоков (0–12)", num(c, "walls", 0, 12)))),
       lock: () => {
         const box = h("div", { class: "sp-seq" });
         const draw = () => {
@@ -251,6 +287,17 @@ export class PuzzleEditor extends ApplicationV2 {
     T[d.type]();
     root.append(f);
 
+    const others = Store.list().filter(x => x.id !== d.id);
+    root.append(h("fieldset", {}, h("legend", {}, "Таймер и цепочка"),
+      h("div", { class: "sp-two" },
+        field("Таймер, секунд (0 — без таймера)", num(d.timer, "sec", 0, 86400), "Идёт, пока скрижаль открыта игрокам."),
+        field("Когда время вышло", sel(d.timer, "action", [["lock", "Скрижаль запирается"], ["reset", "Прогресс сбрасывается, таймер идёт заново"]]))),
+      h("span", { class: "sp-flabel" }, "После решения откроются скрижали (цепочка):"),
+      others.length
+        ? h("div", { class: "sp-chain" }, others.map(o => h("label", { class: "sp-inline" },
+          h("input", { type: "checkbox", checked: d.unlocks.includes(o.id), onchange: e => { const s = new Set(d.unlocks); if (e.target.checked) s.add(o.id); else s.delete(o.id); d.unlocks = [...s]; } }), ` ${o.name}`)))
+        : h("small", { class: "sp-hint-text" }, "Других скрижалей пока нет.")));
+
     root.append(h("div", { class: "sp-toolbar" },
       h("button", { type: "button", class: "sp-btn sp-big", onclick: () => this.#save() }, icon("fa-floppy-disk"), " Сохранить"),
       h("button", { type: "button", class: "sp-btn", onclick: () => this.close() }, "Отмена")),
@@ -265,12 +312,20 @@ export class PuzzleEditor extends ApplicationV2 {
     d.hints = this.hintsText.split("\n").map(x => x.trim()).filter(Boolean);
     d.roll.dc = Number(d.roll.dc) || 0;
     d.roll.max = Math.max(0, Math.trunc(Number(d.roll.max) || 0));
+    d.timer.sec = Math.max(0, Math.trunc(Number(d.timer.sec) || 0));
+    if (d.type === "pairs" && (d.config.pairs.length < 2 || d.config.pairs.some(x => !(x.a.img || x.a.text) || !(x.b.img || x.b.text)))) {
+      return ui.notifications.warn("У каждой карточки каждой пары должна быть картинка или подпись (и минимум 2 пары).");
+    }
     const changed = JSON.stringify(d.config) !== this.origConfig;
     await Store.mutate(list => {
       const i = list.findIndex(p => p.id === d.id);
-      if (i < 0) { d.state = Logic[d.type].create(d.config); list.push(d); return; }
+      if (i < 0) { d.timer.left = d.timer.sec * 1000; d.timer.since = null; d.timer.expired = false; d.state = Logic[d.type].create(d.config); list.push(d); return; }
       const cur = list[i];
-      Object.assign(cur, { name: d.name, intro: d.intro, successText: d.successText, hints: d.hints, roll: d.roll, config: d.config });
+      Object.assign(cur, { name: d.name, intro: d.intro, successText: d.successText, hints: d.hints, roll: d.roll, config: d.config, unlocks: d.unlocks });
+      const prev = cur.timer ?? { sec: 0, left: 0, since: null, expired: false };
+      cur.timer = prev.sec !== d.timer.sec
+        ? { sec: d.timer.sec, action: d.timer.action, left: d.timer.sec * 1000, since: d.timer.sec && cur.visible && !cur.solved ? nowMs() : null, expired: false }
+        : { ...prev, action: d.timer.action };
       if (changed) resetPuzzle(cur);
     });
     this.close();

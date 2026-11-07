@@ -1,5 +1,5 @@
 import { MOD } from "./util.mjs";
-import { Store, Net, canShow, isScreen } from "./store.mjs";
+import { Store, Net, canShow, isScreen, sweepTimers } from "./store.mjs";
 import { PuzzleView, openPuzzle, closeScreens } from "./views.mjs";
 import { PuzzleManager } from "./editor.mjs";
 
@@ -53,6 +53,8 @@ Hooks.once("init", () => {
 
 Hooks.once("ready", () => {
   Net.init();
+  // таймеры скрижалей проверяет активный мастер
+  setInterval(() => { if (game.users.activeGM?.isSelf) sweepTimers(); }, 2000);
   const mod = game.modules.get(MOD);
   if (mod) mod.api = { openManager: () => PuzzleManager.open(), openPuzzle: id => PuzzleView.open(id), Store };
   seen = autoOpen() ? shownIds() : new Set();

@@ -1,4 +1,6 @@
 import { mod, rnd, shuffle, norm, clamp } from "./util.mjs";
+import { pairs, levers, mirrors } from "./logic_extra.mjs";
+export { traceBeam, MAX_PAIRS } from "./logic_extra.mjs";
 
 export const ALPHA = {
   cyr: "абвгдежзийклмнопрстуфхцчшщъыьэюя",
@@ -14,7 +16,10 @@ export const TYPES = {
   cryptex: { label: "Криптекс",          icon: "fa-lock",        short: "Криптекс" },
   gaps:    { label: "Пропущенное слово", icon: "fa-pen-nib",     short: "Слово" },
   lock:    { label: "Арканый замок",     icon: "fa-hat-wizard",  short: "Замок" },
-  pick:    { label: "Взлом замка",       icon: "fa-key",         short: "Взлом" }
+  pick:    { label: "Взлом замка",       icon: "fa-key",         short: "Взлом" },
+  pairs:   { label: "Пары из картинок",  icon: "fa-link",        short: "Пары" },
+  levers:  { label: "Ловушка с рычагами", icon: "fa-gears",      short: "Рычаги" },
+  mirrors: { label: "Тень и свет",       icon: "fa-lightbulb",   short: "Свет" }
 };
 
 export const DEFAULTS = {
@@ -23,7 +28,14 @@ export const DEFAULTS = {
   cryptex: { answer: "руны", alphabet: "auto", custom: "" },
   gaps:    { text: "Врата откроются лишь тому, кто назовёт имя [древнего] стража.", decoys: "", maxAttempts: 0 },
   lock:    { count: 8, sequence: [], maxFails: 0 },
-  pick:    { pins: 4, durability: 8, stat: "best", adv: "normal", dc: 12, dcStep: 1 }
+  pick:    { pins: 4, durability: 8, stat: "best", adv: "normal", dc: 12, dcStep: 1 },
+  pairs:   { pairs: [
+    { a: { img: "", text: "Солнце" }, b: { img: "", text: "День" } },
+    { a: { img: "", text: "Луна" }, b: { img: "", text: "Ночь" } },
+    { a: { img: "", text: "Огонь" }, b: { img: "", text: "Пепел" } }
+  ], maxAttempts: 0 },
+  levers:  { levers: 4, lamps: 4, maxAlarm: 12, onTrap: "reset", trapText: "" },
+  mirrors: { size: 7, turns: 4, decoys: 3, walls: 3 }
 };
 
 /** Характеристики и навыки D&D 5e (2024): ключи как в системе dnd5e. */
@@ -431,4 +443,4 @@ const pick = {
   check(p) { return p.state.cur >= p.state.pins; }
 };
 
-export const Logic = { rings, cipher, cryptex, gaps, lock, pick };
+export const Logic = { rings, cipher, cryptex, gaps, lock, pick, pairs, levers, mirrors };

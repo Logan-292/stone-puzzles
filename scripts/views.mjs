@@ -1,5 +1,6 @@
 import { h, mod } from "./util.mjs";
-import { Store, Net, canShow, isScreen } from "./store.mjs";
+import { Store, Net, canShow, isScreen, nowMs, timerInfo } from "./store.mjs";
+import { renderPairs, renderLevers, renderMirrors } from "./views_extra.mjs";
 import { TYPES, ALPHA, alphaOf, cipherCells, parseGaps, runeGlyph, limitOf, exhausted, rollLabel } from "./logic.mjs";
 
 const triesRow = p => { const l = limitOf(p); return l ? h("div", { class: "sp-tries" + (exhausted(p) ? " is-out" : "") }, exhausted(p) ? "Попытки исчерпаны — нужна помощь (бросок) или сброс мастера." : `Попытки: ${p.state.attempts ?? 0} / ${l}`) : null; };
@@ -346,11 +347,35 @@ function renderPick(view, p) {
     h("div", { class: "sp-pick-roll" }, feelBtn, h("small", {}, feelText)));
 }
 
-const RENDER = { rings: renderRings, cipher: renderCipher, cryptex: renderCryptex, gaps: renderGaps, lock: renderLock, pick: renderPick };
+const RENDER = { rings: renderRings, cipher: renderCipher, cryptex: renderCryptex, gaps: renderGaps, lock: renderLock, pick: renderPick, pairs: renderPairs, levers: renderLevers, mirrors: renderMirrors };
 
 /* ------------------------------------------------------------------ */
 /* Окно головоломки                                                    */
 /* ------------------------------------------------------------------ */
+/* ---- Таймер ---- */
+const fmtTime = ms => {
+  const t = Math.ceil(ms / 1000), hh = Math.floor(t / 3600), mm = Math.floor((t % 3600) / 60), ss = t % 60;
+  return (hh ? `${hh}:${String(mm).padStart(2, "0")}` : String(mm)) + `:${String(ss).padStart(2, "0")}`;
+};
+function timerBadge(p) {
+  const i = timerInfo(p);
+  if (!i) return null;
+  if (i.expired) return h("span", { class: "sp-badge sp-timer is-out" }, icon("fa-hourglass-end"), " Время вышло");
+  const el = h("span", { class: "sp-badge sp-timer" + (i.left < 30000 && i.running ? " is-low" : "") }, icon("fa-hourglass-half"), " ", fmtTime(i.left));
+  if (i.running) el.dataset.end = String(nowMs() + i.left);
+  else el.title = "Таймер на паузе";
+  return el;
+}
+// один общий «тикер» обновляет все видимые таймеры (окна и экранный оверлей)
+setInterval(() => {
+  document.querySelectorAll(".sp-timer[data-end]").forEach(el => {
+    const left = Number(el.dataset.end) - nowMs();
+    const txt = el.lastChild;
+    if (txt && txt.nodeType === 3) txt.textContent = fmtTime(Math.max(0, left));
+    el.classList.toggle("is-low", left < 30000);
+  });
+}, 500);
+
 /** Собирает плиту головоломки; общий код для окна и для экранного оверлея. */
 async function buildTablet(view) {
   const p = Store.get(view.puzzleId);
@@ -358,6 +383,7 @@ async function buildTablet(view) {
   const root = h("div", { class: `sp-tablet sp-t-${p.type}` + (p.solved ? " is-solved" : ""), tabindex: "0" });
   const info = TYPES[p.type];
   root.append(h("div", { class: "sp-head" }, icon(info.icon), h("h2", {}, p.name),
+    timerBadge(p),
     p.solved ? h("span", { class: "sp-badge" }, icon("fa-check"), " Решено") : null,
     game.user.isGM && !p.visible ? h("span", { class: "sp-badge sp-hidden" }, icon("fa-eye-slash"), " Скрыто") : null));
   if (p.intro) root.append(h("div", { class: "sp-intro" }, p.intro));

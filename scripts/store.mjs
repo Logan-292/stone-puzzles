@@ -21,6 +21,55 @@ export function isScreen() {
 /** Должна ли скрижаль быть открыта на этом клиенте. Экран показывает всё, что открыто мастером. */
 export const canShow = p => (isScreen() ? !!p.visible : canSee(p, game.user));
 
+/** Серверное время (одинаково на всех клиентах), запасной вариант — локальное. */
+export const nowMs = () => game.time?.serverTime ?? Date.now();
+
+/** Состояние таймера скрижали: null, если таймер не задан. */
+export function timerInfo(p) {
+  const t = p.timer;
+  if (!t?.sec) return null;
+  const running = t.since != null && !p.solved && !t.expired;
+  const base = t.left ?? t.sec * 1000;
+  return { running, left: Math.max(0, base - (running ? nowMs() - t.since : 0)), total: t.sec * 1000, expired: !!t.expired, action: t.action };
+}
+
+/** Показать/скрыть скрижаль; таймер идёт, пока она открыта. */
+export function setVisible(p, v) {
+  p.visible = !!v;
+  const t = p.timer;
+  if (!t?.sec) return;
+  const n = nowMs();
+  if (v) { if (!p.solved && !t.expired && t.since == null) t.since = n; }
+  else if (t.since != null) { t.left = Math.max(0, (t.left ?? t.sec * 1000) - (n - t.since)); t.since = null; }
+}
+
+function stopTimer(p) {
+  const t = p.timer;
+  if (t?.since != null) { t.left = Math.max(0, (t.left ?? t.sec * 1000) - (nowMs() - t.since)); t.since = null; }
+}
+
+/** Если время вышло — применить последствие. Возвращает "lock" | "reset" | null. */
+function applyExpiry(p) {
+  const i = timerInfo(p);
+  if (!i || !i.running || i.left > 0) return null;
+  if (p.timer.action === "reset") { resetPuzzle(p); p.timer.resets = (p.timer.resets ?? 0) + 1; return "reset"; }
+  p.timer.left = 0; p.timer.since = null; p.timer.expired = true;
+  return "lock";
+}
+
+const expiryChat = (name, what) => ChatMessage.create({
+  speaker: { alias: "Каменная скрижаль" },
+  content: `<div class="sp-chat"><strong>Время вышло:</strong> «${esc(name)}» — ${what === "reset" ? "скрижаль сбросилась" : "скрижаль заперта"}.</div>`
+});
+
+/** Вызывается мастером по таймеру: применяет истёкшие таймеры. */
+export async function sweepTimers() {
+  if (!Store.list().some(p => { const i = timerInfo(p); return i?.running && i.left <= 0; })) return;
+  const fired = [];
+  await Store.mutate(list => { for (const p of list) { const r = applyExpiry(p); if (r) fired.push([p.name, r]); } });
+  fired.forEach(([n, r]) => expiryChat(n, r));
+}
+
 /** Хранилище: все головоломки лежат в одной world-настройке. Писать может только мастер. */
 export const Store = {
   list() { return foundry.utils.deepClone(game.settings.get(MOD, "data")?.puzzles ?? []); },
@@ -50,8 +99,11 @@ export function newPuzzle(type) {
     assigned: [],
     solved: false,
     hintsShown: 0,
-    rollsUsed: 0
+    rollsUsed: 0,
+    timer: { sec: 0, action: "lock", left: 0, since: null, expired: false },
+    unlocks: []
   };
+  if (type === "levers") Object.assign(p.roll, { stat: "skills.inv", reward: "segment" });
   p.state = Logic[type].create(p.config);
   return p;
 }
@@ -61,6 +113,11 @@ export function resetPuzzle(p) {
   p.solved = false;
   p.hintsShown = 0;
   p.rollsUsed = 0;
+  if (p.timer?.sec) {
+    p.timer.left = p.timer.sec * 1000;
+    p.timer.since = p.visible ? nowMs() : null;
+    p.timer.expired = false;
+  }
 }
 
 /** Бонус персонажа dnd5e к проверке; null — данных нет. */
@@ -154,18 +211,34 @@ async function handleAct(userId, puzzleId, op, data) {
   if (!user) return;
   let result = {};
   let solved = null;
+  const opened = [];
+  let expired = null;
   await Store.mutate(async list => {
     const p = list.find(x => x.id === puzzleId);
     if (!p || !canSee(p, user) || p.solved) return;
     const L = Logic[p.type];
+    if (p.timer?.expired) { result = { fx: "bad", msg: "Время вышло — скрижаль заперта. Нужна помощь мастера." }; return; }
+    const ex = applyExpiry(p);
+    if (ex) { expired = [p.name, ex]; result = { fx: "bad", msg: ex === "reset" ? "Время вышло — скрижаль сбросилась!" : "Время вышло — скрижаль заперта!" }; return; }
     result = op === "roll" ? await doRoll(p, user)
       : (op === "feel" && p.type === "pick") ? await doFeel(p, user)
       : (L.act(p, op, data ?? {}) ?? {});
     if (!p.solved && L.check(p)) {
       p.solved = true;
+      stopTimer(p);
       result = { ...result, fx: "ok", solved: true };
       solved = p;
+      // цепочка: решённая скрижаль открывает следующие
+      for (const id of p.unlocks ?? []) {
+        const t = list.find(x => x.id === id);
+        if (t && !t.visible && !t.solved) { setVisible(t, true); opened.push(t.name); }
+      }
     }
+  });
+  if (expired) expiryChat(...expired);
+  if (opened.length) ChatMessage.create({
+    speaker: { alias: "Каменная скрижаль" },
+    content: `<div class="sp-chat"><strong>Открылась новая скрижаль:</strong> ${opened.map(n => `«${esc(n)}»`).join(", ")}</div>`
   });
   if (solved) {
     const body = solved.successText ? `<p style="white-space:pre-wrap">${esc(solved.successText)}</p>` : "";
