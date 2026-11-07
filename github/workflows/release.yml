@@ -1,19 +1,35 @@
 name: Release
 
-# Релиз создаётся при пуше тега вида v1.0.1
+# Срабатывает и на пуш тега v*, и когда релиз создан вручную в интерфейсе GitHub,
+# и вручную из вкладки Actions (Run workflow, указать тег).
 on:
   push:
     tags:
       - "v*"
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Тег релиза, например v1.0.0"
+        required: true
 
 permissions:
   contents: write
 
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
 jobs:
   release:
     runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
 
       - name: Проверить синтаксис скриптов
         run: |
@@ -21,7 +37,7 @@ jobs:
 
       - name: Прописать версию и ссылки в module.json
         run: |
-          VERSION="${GITHUB_REF_NAME#v}"
+          VERSION="${TAG#v}"
           jq --arg v "$VERSION" --arg repo "$GITHUB_REPOSITORY" '
             .version = $v
             | .url = "https://github.com/\($repo)"
@@ -35,9 +51,10 @@ jobs:
       - name: Собрать архив модуля
         run: zip -r module.zip module.json scripts styles README.md LICENSE CHANGELOG.md
 
-      - name: Опубликовать релиз
+      - name: Приложить файлы к релизу
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.TAG }}
           files: |
             module.json
             module.zip
